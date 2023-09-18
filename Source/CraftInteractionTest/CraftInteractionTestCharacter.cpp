@@ -2,12 +2,13 @@
 
 #include "CraftInteractionTestCharacter.h"
 #include "CraftInteractionTestProjectile.h"
-#include "Animation/AnimInstance.h"
-#include "Camera/CameraComponent.h"
-#include "Components/CapsuleComponent.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "GameFramework/CIItemInstance.h"
+#include "Interfaces/CIInteractable.h"
+
+#include <Animation/AnimInstance.h>
+#include <Camera/CameraComponent.h>
+#include <Components/CapsuleComponent.h>
+#include <EnhancedInputComponent.h>
+#include <EnhancedInputSubsystems.h>
 #include <Kismet/KismetSystemLibrary.h>
 
 
@@ -126,22 +127,29 @@ void ACraftInteractionTestCharacter::ScanInteractables()
 		GetAttachedActors(actorsToIgnore);
 
 		FHitResult hit(ForceInit);
-		UKismetSystemLibrary::LineTraceSingleForObjects(this, traceStart, traceEnd, InteractionTraceObjectTypes, true, actorsToIgnore, EDrawDebugTrace::ForOneFrame, hit, true);
+		bool bTraceComplex = true;
+		bool bIgnoreSelf = true;
+		UKismetSystemLibrary::LineTraceSingleForObjects(this, traceStart, traceEnd, InteractionTraceObjectTypes, bTraceComplex, actorsToIgnore, EDrawDebugTrace::ForOneFrame, hit, bIgnoreSelf);
 		
-		// TODO: use interface instead of casting to the instance directly.
-		if (const auto hitActor = Cast<ACIItemInstance>(hit.GetActor()))
+		auto hitActor = hit.GetActor();
+		if (hitActor && hitActor->GetClass()->ImplementsInterface(UCIInteractable::StaticClass()))
 		{
 			if (CurrentFocusObject && hitActor != CurrentFocusObject)
 			{
-				CurrentFocusObject->OnFocusLost();
+				ICIInteractable::Execute_OnFocusLost(CurrentFocusObject);
 			}
 
 			CurrentFocusObject = hitActor;
-			CurrentFocusObject->OnFocusStart();
+			ICIInteractable::Execute_OnFocusStart(CurrentFocusObject);
+
+			InteractionFocusChangedDelegate.Broadcast(CurrentFocusObject);
 		}
 		else if (CurrentFocusObject)
 		{
-			CurrentFocusObject->OnFocusLost();
+			ICIInteractable::Execute_OnFocusLost(CurrentFocusObject);
+			CurrentFocusObject = nullptr;
+
+			InteractionFocusChangedDelegate.Broadcast(CurrentFocusObject);
 		}
 	}
 }

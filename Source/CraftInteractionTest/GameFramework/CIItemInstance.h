@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "../Interfaces/CIInteractable.h"
+
 #include <CoreMinimal.h>
 #include <GameFramework/Actor.h>
 
@@ -10,17 +12,20 @@
 class UStaticMeshComponent;
 
 UCLASS()
-class CRAFTINTERACTIONTEST_API ACIItemInstance : public AActor
+class CRAFTINTERACTIONTEST_API ACIItemInstance : public AActor, public ICIInteractable
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Mesh;
 	
 public:	
 	// Sets default values for this actor's properties
 	ACIItemInstance();
 
-	virtual void OnFocusStart();
-	virtual void OnFocusLost();
+	// Inherited via ICIInteractable
+	void GetPossibleInteractions_Implementation(TMap<FName, FInteractionDefinition>& interactions) override;
+	void Interact_Implementation(FName interaction, AActor* interactingActor) override;
+	void OnFocusStart_Implementation() override;
+	void OnFocusLost_Implementation() override;
 };

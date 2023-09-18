@@ -16,7 +16,15 @@ ACIItemInstance::ACIItemInstance()
 	SetRootComponent(Mesh);
 }
 
-void ACIItemInstance::OnFocusStart()
+void ACIItemInstance::GetPossibleInteractions_Implementation(TMap<FName, FInteractionDefinition>& interactions)
+{
+}
+
+void ACIItemInstance::Interact_Implementation(FName interaction, AActor* interactingActor)
+{
+}
+
+void ACIItemInstance::OnFocusStart_Implementation()
 {
 	if (Mesh)
 	{
@@ -24,7 +32,7 @@ void ACIItemInstance::OnFocusStart()
 	}
 }
 
-void ACIItemInstance::OnFocusLost()
+void ACIItemInstance::OnFocusLost_Implementation()
 {
 	if (Mesh)
 	{

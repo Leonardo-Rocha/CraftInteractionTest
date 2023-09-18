@@ -7,6 +7,8 @@
 #include "InputActionValue.h"
 #include "CraftInteractionTestCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInteractionFocusChangedDelegate, AActor*, newFocusedActor);
+
 class UInputComponent;
 class USkeletalMeshComponent;
 class USceneComponent;
@@ -15,7 +17,7 @@ class UAnimMontage;
 class USoundBase;
 class UInputMappingContext;
 class UInputAction;
-class ACIItemInstance;
+class ICIInteractable;
 
 UCLASS(config = Game)
 class ACraftInteractionTestCharacter : public ACharacter
@@ -59,11 +61,14 @@ class ACraftInteractionTestCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 	float MaxInteractionDistance = 500.f;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Interaction, meta = (AllowPrivateAccess = "true"))
-	ACIItemInstance* CurrentFocusObject = nullptr;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Interaction, meta = (AllowPrivateAccess = "true"))
 	TArray<TEnumAsByte<EObjectTypeQuery>> InteractionTraceObjectTypes;
+
+	UPROPERTY(BlueprintReadOnly, Category = Interaction, meta = (AllowPrivateAccess = "true"))
+	AActor* CurrentFocusObject = nullptr;
+
+	UPROPERTY(BlueprintAssignable, Category = Interaction, meta = (AllowPrivateAccess = "true"))
+	FInteractionFocusChangedDelegate InteractionFocusChangedDelegate;
 
 public:
 	ACraftInteractionTestCharacter();
@@ -75,7 +80,7 @@ public:
 
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* LookAction;
+	UInputAction* LookAction;
 
 	/** Bool for AnimBP to switch to another animation set */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
