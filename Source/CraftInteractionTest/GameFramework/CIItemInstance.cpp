@@ -16,12 +16,14 @@ ACIItemInstance::ACIItemInstance()
 	SetRootComponent(Mesh);
 }
 
-void ACIItemInstance::GetPossibleInteractions_Implementation(TMap<FName, FInteractionDefinition>& interactions)
+void ACIItemInstance::GetPossibleInteractions_Implementation(TMap<EInteractionType, FInteractionDefinition>& interactions)
 {
+	interactions = Interactions;
 }
 
-void ACIItemInstance::Interact_Implementation(FName interaction, AActor* interactingActor)
+void ACIItemInstance::Interact_Implementation(EInteractionType interaction, ACraftInteractionTestCharacter* interactingCharacter)
 {
+	// To be implemented in children
 }
 
 void ACIItemInstance::OnFocusStart_Implementation()

@@ -31,7 +31,8 @@ ACraftInteractionTestCharacter::ACraftInteractionTestCharacter()
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
-	Mesh1P->SetOnlyOwnerSee(true);
+	// We'll enable visibility of the mesh so we don't have to do a 3P setup with animations and everything.
+	// Mesh1P->SetOnlyOwnerSee(true);
 	Mesh1P->SetupAttachment(FirstPersonCameraComponent);
 	Mesh1P->bCastDynamicShadow = false;
 	Mesh1P->CastShadow = false;
@@ -40,6 +41,8 @@ ACraftInteractionTestCharacter::ACraftInteractionTestCharacter()
 
 	InteractionTraceObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
 	InteractionTraceObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));
+
+	bReplicates = true;
 }
 
 void ACraftInteractionTestCharacter::BeginPlay()
@@ -76,10 +79,13 @@ void ACraftInteractionTestCharacter::SetupPlayerInputComponent(class UInputCompo
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		//Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACraftInteractionTestCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Move);
 
 		//Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACraftInteractionTestCharacter::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
+
+		//Interacting
+		EnhancedInputComponent->BindAction(PrimaryInteraction, ETriggerEvent::Triggered, this, &ThisClass::ExecutePrimaryInteraction);
 	}
 }
 
@@ -122,7 +128,7 @@ void ACraftInteractionTestCharacter::ScanInteractables()
 		// TRotator::Vector already returns a unit direction vector
 		const FVector traceEnd = traceStart + (cameraRotation.Vector() * MaxInteractionDistance);
 
-		// Ignoring all attached actors - e.g. weapon
+		// Ignoring all attached actors - e.g. weapon or picked up items
 		TArray<AActor*> actorsToIgnore;
 		GetAttachedActors(actorsToIgnore);
 
@@ -152,6 +158,27 @@ void ACraftInteractionTestCharacter::ScanInteractables()
 			InteractionFocusChangedDelegate.Broadcast(CurrentFocusObject);
 		}
 	}
+}
+
+void ACraftInteractionTestCharacter::ExecutePrimaryInteraction()
+{
+	// TODO: RPC to interact on server.
+	// We don't check if it implements interface again because we only assign when it implements
+	if (CurrentFocusObject)
+	{
+		TMap<EInteractionType, FInteractionDefinition> interactions;
+
+		ICIInteractable::Execute_GetPossibleInteractions(CurrentFocusObject, interactions);
+
+		if (interactions.Contains(EInteractionType::IT_PrimaryInteraction))
+		{
+			ICIInteractable::Execute_Interact(CurrentFocusObject, EInteractionType::IT_PrimaryInteraction, this);
+		}
+	}
+}
+
+void ACraftInteractionTestCharacter::ExecuteSecondaryInteraction()
+{
 }
 
 void ACraftInteractionTestCharacter::SetHasRifle(bool bNewHasRifle)

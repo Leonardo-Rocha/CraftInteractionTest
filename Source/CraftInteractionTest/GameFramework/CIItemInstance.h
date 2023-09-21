@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../Interfaces/CIInteractable.h"
+#include "CraftInteractionTest/Interfaces/CIInteractable.h"
 
 #include <CoreMinimal.h>
 #include <GameFramework/Actor.h>
@@ -24,8 +24,8 @@ public:
 	ACIItemInstance();
 
 	// Inherited via ICIInteractable
-	void GetPossibleInteractions_Implementation(TMap<FName, FInteractionDefinition>& interactions) override;
-	void Interact_Implementation(FName interaction, AActor* interactingActor) override;
-	void OnFocusStart_Implementation() override;
-	void OnFocusLost_Implementation() override;
+	virtual void GetPossibleInteractions_Implementation(TMap<EInteractionType, FInteractionDefinition>& interactions) override;
+	virtual void Interact_Implementation(EInteractionType interaction, ACraftInteractionTestCharacter* interactingCharacter) override;
+	virtual void OnFocusStart_Implementation() override;
+	virtual void OnFocusLost_Implementation() override;
 };

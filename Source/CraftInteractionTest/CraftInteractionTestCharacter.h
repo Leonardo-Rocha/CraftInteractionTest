@@ -103,6 +103,10 @@ protected:
 
 	void ScanInteractables();
 
+	void ExecutePrimaryInteraction();
+
+	void ExecuteSecondaryInteraction();
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
