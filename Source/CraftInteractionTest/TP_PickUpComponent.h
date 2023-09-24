@@ -5,12 +5,14 @@
 #include "CoreMinimal.h"
 #include "Components/SphereComponent.h"
 #include "CraftInteractionTestCharacter.h"
+
+#include <EnhancedInputComponent.h>
+
 #include "TP_PickUpComponent.generated.h"
 
 class UInputMappingContext;
 class UInputAction;
 class ACIPickup;
-struct FInputBindingHandle;
 
 // Declaration of the delegate that will be called when someone picks this up
 // The character picking this up is the parameter sent with the notification
@@ -59,5 +61,5 @@ protected:
 	void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const;
 
 private:
-	FInputBindingHandle DropPickUpActionBindingHandle;
+	// FEnhancedInputActionEventBinding DropPickUpActionBindingHandle;
 };

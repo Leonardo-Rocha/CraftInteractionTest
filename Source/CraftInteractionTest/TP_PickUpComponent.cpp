@@ -7,7 +7,6 @@
 #include <Kismet/KismetSystemLibrary.h>
 #include <Net/Core/PushModel/PushModel.h>
 #include <EnhancedInputSubsystems.h>
-#include <EnhancedInputComponent.h>
 
 UTP_PickUpComponent::UTP_PickUpComponent()
 {
@@ -135,11 +134,12 @@ void UTP_PickUpComponent::OnRep_CurrentAttachedPickUp(ACIPickup* oldAttachedPick
 			{
 				if (bPickupWasDropped)
 				{
-					enhancedInputComponent->RemoveActionBinding(DropPickUpActionBindingHandle.GetHandle());
+					// TODO: remove binding if necessary
+					// enhancedInputComponent->RemoveBinding(DropPickUpActionBindingHandle);
 				}
 				{
 					// Drop Pickup
-					DropPickUpActionBindingHandle = enhancedInputComponent->BindAction(DropPickUpAction, ETriggerEvent::Triggered, this, &ThisClass::DropPickUp);
+					enhancedInputComponent->BindAction(DropPickUpAction, ETriggerEvent::Triggered, this, &ThisClass::DropPickUp);
 				}
 			}
 		}
