@@ -28,4 +28,6 @@ public:
 	virtual void Interact_Implementation(EInteractionType interaction, ACraftInteractionTestCharacter* interactingCharacter) override;
 	virtual void OnFocusStart_Implementation() override;
 	virtual void OnFocusLost_Implementation() override;
+
+	UStaticMeshComponent* GetMesh() const { return Mesh; }
 };

@@ -7,6 +7,11 @@
 #include "CraftInteractionTestCharacter.h"
 #include "TP_PickUpComponent.generated.h"
 
+class UInputMappingContext;
+class UInputAction;
+class ACIPickup;
+struct FInputBindingHandle;
+
 // Declaration of the delegate that will be called when someone picks this up
 // The character picking this up is the parameter sent with the notification
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPickUp, ACraftInteractionTestCharacter*, PickUpCharacter);
@@ -16,22 +21,43 @@ class CRAFTINTERACTIONTEST_API UTP_PickUpComponent : public USphereComponent
 {
 	GENERATED_BODY()
 
-public:
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing= OnRep_CurrentAttachedPickUp)
-	AActor* CurrentAttachedPickUp = nullptr;
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing= OnRep_CurrentAttachedPickUp, meta = (AllowPrivateAccess = "true"))
+	ACIPickup* CurrentAttachedPickUp = nullptr;
 
 	ACraftInteractionTestCharacter* OwnerCharacter;
 
+	/** MappingContext */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputMappingContext* PickUpMappingContext;
+
+	/** Fire Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DropPickUpAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	float MaxDropPickUpDistance = 500.f;
+
+public:
 	UTP_PickUpComponent();
 
-	virtual void SetupPickup(AActor* newPickup);
+	virtual void SetupPickup(ACIPickup* newPickup);
+
 protected:
 
 	/** Called when the game starts */
 	virtual void BeginPlay() override;
 
+	virtual void DropPickUp();
+
+	UFUNCTION(Server, Reliable)
+	void ServerDropPickUp(FVector_NetQuantize dropLocation);
+	void ServerDropPickUp_Implementation(FVector_NetQuantize dropLocation);
+
 	UFUNCTION()
-	void OnRep_CurrentAttachedPickUp();
+	void OnRep_CurrentAttachedPickUp(ACIPickup* oldAttachedPickUp);
 
 	void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const;
+
+private:
+	FInputBindingHandle DropPickUpActionBindingHandle;
 };

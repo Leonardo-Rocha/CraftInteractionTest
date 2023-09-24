@@ -12,6 +12,9 @@ ACIPickup::ACIPickup()
 	PickupInteraction.InteractionPrompt = FText::FromString(TEXT("Pickup"));
 
 	Interactions.Add(EInteractionType::IT_PrimaryInteraction, PickupInteraction);
+
+	bReplicates = true;
+	SetReplicateMovement(true);
 }
 
 void ACIPickup::GetPossibleInteractions_Implementation(TMap<EInteractionType, FInteractionDefinition>& interactions)
