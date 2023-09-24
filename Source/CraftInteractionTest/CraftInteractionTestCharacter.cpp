@@ -89,6 +89,9 @@ void ACraftInteractionTestCharacter::SetupPlayerInputComponent(class UInputCompo
 
 		//Interacting
 		EnhancedInputComponent->BindAction(PrimaryInteraction, ETriggerEvent::Triggered, this, &ThisClass::ExecutePrimaryInteraction);
+
+		// Drop PickUp
+		EnhancedInputComponent->BindAction(DropPickUpAction, ETriggerEvent::Triggered, PickUpComponent, &UTP_PickUpComponent::DropPickUp);
 	}
 }
 

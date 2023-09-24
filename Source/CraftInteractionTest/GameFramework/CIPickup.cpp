@@ -5,6 +5,9 @@
 #include "CraftInteractionTest/CraftInteractionTestCharacter.h"
 #include "CraftInteractionTest/TP_PickUpComponent.h"
 
+#include <Net/UnrealNetwork.h>
+#include <Net/Core/PushModel/PushModel.h>
+
 ACIPickup::ACIPickup()
 {
 	PickupInteraction.bIsAvailable = true;
@@ -15,33 +18,61 @@ ACIPickup::ACIPickup()
 
 	bReplicates = true;
 	SetReplicateMovement(true);
+
+	bIsPickUpAvailable = PickupInteraction.bIsAvailable;
 }
 
 void ACIPickup::GetPossibleInteractions_Implementation(TMap<EInteractionType, FInteractionDefinition>& interactions)
 {
-	interactions = Interactions;
+	PickupInteraction.bIsAvailable = bIsPickUpAvailable;
+
+	interactions.Add(EInteractionType::IT_PrimaryInteraction, PickupInteraction);
 }
 
 void ACIPickup::Interact_Implementation(EInteractionType interaction, ACraftInteractionTestCharacter* interactingCharacter)
 {
-	if (const auto foundInteraction = Interactions.Find(interaction))
+	switch (interaction)
 	{
-		if (foundInteraction->bIsAvailable)
+		case EInteractionType::IT_PrimaryInteraction:
 		{
-			// Attach to characters hands
-			UE_LOG(LogTemp, Display, TEXT("[%s] %s interaction available. Attempting to pick up."), ANSI_TO_TCHAR(__FUNCTION__), *UEnum::GetValueAsString(interaction));
+			if (bIsPickUpAvailable)
+			{
+				UE_LOG(LogTemp, Display, TEXT("[%s] %s interaction available. Attempting to pick up."), ANSI_TO_TCHAR(__FUNCTION__), *UEnum::GetValueAsString(interaction));
 
-			interactingCharacter->GetPickUpComponent()->SetupPickup(this);
+				interactingCharacter->GetPickUpComponent()->SetupPickup(this);
 
-			foundInteraction->bIsAvailable = false;
+				SetIsPickupAvailable(false);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Display, TEXT("[%s] %s Interaction not available."), ANSI_TO_TCHAR(__FUNCTION__), *UEnum::GetValueAsString(interaction));
+			}
+
+			break;
 		}
-		else
+		default:
 		{
-			UE_LOG(LogTemp, Display, TEXT("[%s] %s Interaction not available."), ANSI_TO_TCHAR(__FUNCTION__), *UEnum::GetValueAsString(interaction));
+			UE_LOG(LogTemp, Error, TEXT("[%s] %s Interaction not defined for this interactable."), ANSI_TO_TCHAR(__FUNCTION__), *UEnum::GetValueAsString(interaction));
 		}
 	}
-	else
+}
+
+void ACIPickup::SetIsPickupAvailable(bool newValue)
+{
+	if (HasAuthority())
 	{
-		UE_LOG(LogTemp, Error, TEXT("[%s] %s Interaction not defined for this interactable."), ANSI_TO_TCHAR(__FUNCTION__), *UEnum::GetValueAsString(interaction));
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, bIsPickUpAvailable, this);
+
+		bIsPickUpAvailable = newValue;
 	}
+}
+
+void ACIPickup::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	FDoRepLifetimeParams sharedParams;
+	sharedParams.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bIsPickUpAvailable, sharedParams);
 }

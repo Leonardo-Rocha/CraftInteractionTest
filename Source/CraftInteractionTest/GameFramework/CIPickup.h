@@ -20,9 +20,15 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Interaction)
 	FInteractionDefinition PickupInteraction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Interaction, Replicated)
+	uint8 bIsPickUpAvailable : 1;
+
 	ACIPickup();
 
 	virtual void GetPossibleInteractions_Implementation(TMap<EInteractionType, FInteractionDefinition>& interactions) override;
 	virtual void Interact_Implementation(EInteractionType interaction, ACraftInteractionTestCharacter* interactingCharacter) override;
 
+	void SetIsPickupAvailable(bool newValue);
+
+	void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const;
 };

@@ -28,14 +28,6 @@ class CRAFTINTERACTIONTEST_API UTP_PickUpComponent : public USphereComponent
 
 	ACraftInteractionTestCharacter* OwnerCharacter;
 
-	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputMappingContext* PickUpMappingContext;
-
-	/** Fire Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* DropPickUpAction;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	float MaxDropPickUpDistance = 500.f;
 
@@ -44,12 +36,12 @@ public:
 
 	virtual void SetupPickup(ACIPickup* newPickup);
 
+	virtual void DropPickUp();
+
 protected:
 
 	/** Called when the game starts */
 	virtual void BeginPlay() override;
-
-	virtual void DropPickUp();
 
 	UFUNCTION(Server, Reliable)
 	void ServerDropPickUp(FVector_NetQuantize dropLocation);
@@ -59,7 +51,4 @@ protected:
 	void OnRep_CurrentAttachedPickUp(ACIPickup* oldAttachedPickUp);
 
 	void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const;
-
-private:
-	// FEnhancedInputActionEventBinding DropPickUpActionBindingHandle;
 };

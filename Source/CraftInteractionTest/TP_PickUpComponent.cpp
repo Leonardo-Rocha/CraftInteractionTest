@@ -3,8 +3,8 @@
 #include "TP_PickUpComponent.h"
 #include "GameFramework/CIPickup.h"
 
-#include <Net/UnrealNetwork.h>
 #include <Kismet/KismetSystemLibrary.h>
+#include <Net/UnrealNetwork.h>
 #include <Net/Core/PushModel/PushModel.h>
 #include <EnhancedInputSubsystems.h>
 
@@ -88,6 +88,8 @@ void UTP_PickUpComponent::OnRep_CurrentAttachedPickUp(ACIPickup* oldAttachedPick
 	{
 		if (GetOwner()->HasAuthority())
 		{
+			oldAttachedPickUp->SetIsPickupAvailable(true);
+
 			// It was already detached and adjusted in authority
 			return;
 		}
@@ -108,41 +110,6 @@ void UTP_PickUpComponent::OnRep_CurrentAttachedPickUp(ACIPickup* oldAttachedPick
 		// Attach the pickup to the First Person Character
 		FAttachmentTransformRules attachmentRules(EAttachmentRule::SnapToTarget, true);
 		CurrentAttachedPickUp->AttachToComponent(OwnerCharacter->GetMesh1P(), attachmentRules, FName(TEXT("PickupSocket")));
-	}
-
-	// Set up action bindings
-	if (auto playerController = Cast<APlayerController>(OwnerCharacter->GetController()))
-	{
-		if (playerController->IsLocalController())
-		{
-			UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Setting up action bindings for local controller."), ANSI_TO_TCHAR(__FUNCTION__)));
-
-			if (auto enhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer()))
-			{
-				// the pickup was dropped
-				if (bPickupWasDropped)
-				{
-					enhancedInputSubsystem->RemoveMappingContext(PickUpMappingContext);
-				}
-				else
-				{
-					enhancedInputSubsystem->AddMappingContext(PickUpMappingContext, 0);
-				}
-			}
-
-			if (auto enhancedInputComponent = Cast<UEnhancedInputComponent>(playerController->InputComponent))
-			{
-				if (bPickupWasDropped)
-				{
-					// TODO: remove binding if necessary
-					// enhancedInputComponent->RemoveBinding(DropPickUpActionBindingHandle);
-				}
-				{
-					// Drop Pickup
-					enhancedInputComponent->BindAction(DropPickUpAction, ETriggerEvent::Triggered, this, &ThisClass::DropPickUp);
-				}
-			}
-		}
 	}
 }
 
