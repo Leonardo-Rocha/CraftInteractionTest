@@ -3,6 +3,7 @@
 #include "CraftInteractionTestCharacter.h"
 #include "CraftInteractionTestProjectile.h"
 #include "Interfaces/CIInteractable.h"
+#include "TP_PickUpComponent.h"
 
 #include <Animation/AnimInstance.h>
 #include <Camera/CameraComponent.h>
@@ -38,6 +39,8 @@ ACraftInteractionTestCharacter::ACraftInteractionTestCharacter()
 	Mesh1P->CastShadow = false;
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
+
+	PickUpComponent = CreateDefaultSubobject<UTP_PickUpComponent>(TEXT("PickUpComponent"));
 
 	InteractionTraceObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
 	InteractionTraceObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));
@@ -172,13 +175,26 @@ void ACraftInteractionTestCharacter::ExecutePrimaryInteraction()
 
 		if (interactions.Contains(EInteractionType::IT_PrimaryInteraction))
 		{
-			ICIInteractable::Execute_Interact(CurrentFocusObject, EInteractionType::IT_PrimaryInteraction, this);
+			ServerExecuteInteraction(CurrentFocusObject, EInteractionType::IT_PrimaryInteraction);
 		}
 	}
 }
 
 void ACraftInteractionTestCharacter::ExecuteSecondaryInteraction()
 {
+}
+
+void ACraftInteractionTestCharacter::ServerExecuteInteraction_Implementation(AActor* interactionObject, EInteractionType interactionType)
+{
+	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Executing %s interaction in %s."), *UEnum::GetValueAsString(interactionType), *interactionObject->GetName()));
+	ICIInteractable::Execute_Interact(interactionObject, interactionType, this);
+}
+
+bool ACraftInteractionTestCharacter::ServerExecuteInteraction_Validate(AActor* interactionObject, EInteractionType interactionType)
+{
+	// Here we validate if the client is actually near the object he's trying to interact with
+	float distanceToInteractionObject = GetDistanceTo(interactionObject);
+	return distanceToInteractionObject <= MaxInteractionDistance;
 }
 
 void ACraftInteractionTestCharacter::SetHasRifle(bool bNewHasRifle)

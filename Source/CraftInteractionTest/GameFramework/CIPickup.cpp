@@ -3,6 +3,7 @@
 
 #include "CIPickup.h"
 #include "CraftInteractionTest/CraftInteractionTestCharacter.h"
+#include "CraftInteractionTest/TP_PickUpComponent.h"
 
 ACIPickup::ACIPickup()
 {
@@ -27,13 +28,9 @@ void ACIPickup::Interact_Implementation(EInteractionType interaction, ACraftInte
 			// Attach to characters hands
 			UE_LOG(LogTemp, Display, TEXT("[%s] %s interaction available. Attempting to pick up."), ANSI_TO_TCHAR(__FUNCTION__), *UEnum::GetValueAsString(interaction));
 
-			SetActorEnableCollision(false);
+			interactingCharacter->GetPickUpComponent()->SetupPickup(this);
 
-			// TODO: Add mapping context so users can drop the picked up item
-
-			// Attach the pickup to the First Person Character
-			FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-			AttachToComponent(interactingCharacter->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
+			foundInteraction->bIsAvailable = false;
 		}
 		else
 		{
