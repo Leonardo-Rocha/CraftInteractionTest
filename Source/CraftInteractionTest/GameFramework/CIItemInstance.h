@@ -18,8 +18,11 @@ class CRAFTINTERACTIONTEST_API ACIItemInstance : public AActor, public ICIIntera
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Mesh;
-	
+
 public:	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Item)
+	FDataTableRowHandle ItemDefinition;
+
 	// Sets default values for this actor's properties
 	ACIItemInstance();
 

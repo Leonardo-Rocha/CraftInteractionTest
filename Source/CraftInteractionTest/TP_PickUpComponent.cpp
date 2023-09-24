@@ -67,15 +67,15 @@ void UTP_PickUpComponent::ServerDropPickUp_Implementation(FVector_NetQuantize dr
 	CurrentAttachedPickUp->GetMesh()->GetLocalBounds(minBounds, maxBounds);
 	float halfHeight = (maxBounds.Z - minBounds.Z) * 0.5f;
 
-	// Supposing all the items meshes always have origin in the center, we you can adjust the Z-coordinate of the item's location by adding half of the mesh's height.
+	// Supposing all the items meshes always have origin in the center, we can adjust the Z-coordinate of the item's location by adding half of the mesh's height.
 	dropLocation.Z += halfHeight;
 	
 	auto newTransform = FTransform(dropLocation);
 
-	CurrentAttachedPickUp->SetActorTransform(newTransform);
+	CurrentAttachedPickUp->SetActorTransform(newTransform, true);
 	CurrentAttachedPickUp->SetActorEnableCollision(true);
 
-	UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Adjusted location: %s"), ANSI_TO_TCHAR(__FUNCTION__), *CurrentAttachedPickUp->GetActorLocation().ToString()));
+	// UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Adjusted location: %s"), ANSI_TO_TCHAR(__FUNCTION__), *CurrentAttachedPickUp->GetActorLocation().ToString()));
 
 	SetupPickup(nullptr);
 }
@@ -94,16 +94,16 @@ void UTP_PickUpComponent::OnRep_CurrentAttachedPickUp(ACIPickup* oldAttachedPick
 			return;
 		}
 
-		// For the clients we simply detach and rely on replication to update the location based on server changes
-		UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Detaching pickup. New Location: %s"), ANSI_TO_TCHAR(__FUNCTION__), *oldAttachedPickUp->GetActorLocation().ToString()));
+		// UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Detaching pickup. New Location: %s"), ANSI_TO_TCHAR(__FUNCTION__), *oldAttachedPickUp->GetActorLocation().ToString()));
 
+		// For the clients we simply detach and rely on replication to update the location based on server changes
 		FDetachmentTransformRules detachmentRules(EDetachmentRule::KeepWorld, true);
 		oldAttachedPickUp->DetachFromActor(detachmentRules);
 		oldAttachedPickUp->SetActorEnableCollision(true);
 	}
 	else
 	{
-		UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Received rep notify for obj %s."), ANSI_TO_TCHAR(__FUNCTION__), *CurrentAttachedPickUp->GetName()));
+		// UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Received rep notify for obj %s."), ANSI_TO_TCHAR(__FUNCTION__), *CurrentAttachedPickUp->GetName()));
 
 		CurrentAttachedPickUp->SetActorEnableCollision(false);
 

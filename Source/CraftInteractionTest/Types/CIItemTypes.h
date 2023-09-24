@@ -3,6 +3,8 @@
 
 #include "CIItemTypes.generated.h"
 
+class ACIItemInstance;
+
 USTRUCT(BlueprintType)
 struct FItemDefinition : public FTableRowBase
 {
@@ -15,7 +17,7 @@ public:
 	FText DisplayName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	TSoftClassPtr<AActor> ItemInstanceClass;
+	TSoftClassPtr<ACIItemInstance> ItemInstanceClass;
 };
 
 USTRUCT(BlueprintType)
@@ -27,8 +29,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recipe")
 	FDataTableRowHandle Item;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recipe")
-	int32 Quantity = 1;
+	// TODO: to be supported later
+	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Recipe")
+	int32 Quantity = 1;*/
 };
 
 USTRUCT(BlueprintType)
