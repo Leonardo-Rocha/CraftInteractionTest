@@ -53,6 +53,20 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="On Machine State Changed"))
 	void BP_OnMachineStateChanged();
 
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRecipeSpawnFailed();
+	void MulticastRecipeSpawnFailed_Implementation() { BP_OnRecipeSpawnFailed(); }
+
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Recipe Spawn Failed"))
+	void BP_OnRecipeSpawnFailed();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRecipeCompleted();
+	void MulticastRecipeCompleted_Implementation() { BP_OnRecipeCompleted(); }
+
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Recipe Completed"))
+	void BP_OnRecipeCompleted();
+
 public:
 	UFUNCTION()
 	void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

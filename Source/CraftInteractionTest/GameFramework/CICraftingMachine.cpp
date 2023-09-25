@@ -37,6 +37,11 @@ void ACICraftingMachine::BeginPlay()
 
 void ACICraftingMachine::CraftFirstPossibleRecipe()
 {
+    if (!bIsMachineOn)
+    {
+        MulticastRecipeSpawnFailed();
+    }
+
     TArray<ACIItemInstance*> ingredientsActors;
     FRecipe* possibleRecipe;
 
@@ -106,6 +111,8 @@ void ACICraftingMachine::SpawnItemFromRecipe(FRecipe* possibleRecipe)
 
         // Spawn the projectile at the muzzle
         world->SpawnActor<ACIItemInstance>(completedRecipeItemDefinition->ItemInstanceClass.LoadSynchronous(), spawnLocation, FRotator::ZeroRotator, spawnParams);
+
+        MulticastRecipeCompleted();
     }
 }
 
@@ -148,6 +155,12 @@ void ACICraftingMachine::Interact_Implementation(EInteractionType interaction, A
     {
         case EInteractionType::IT_PrimaryInteraction:
         {
+            if (!bIsMachineOn)
+            {
+                MulticastRecipeSpawnFailed();
+                break;
+            }
+
             // choose random recipe
             int32 randomIndex = FMath::RandRange(0, AvailableRecipes.Num() - 1);
             auto randomRecipe = AvailableRecipes[randomIndex].GetRow<FRecipe>(TEXT("Getting random recipe."));
