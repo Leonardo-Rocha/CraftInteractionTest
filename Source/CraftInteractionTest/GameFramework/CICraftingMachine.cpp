@@ -149,8 +149,10 @@ void ACICraftingMachine::Interact_Implementation(EInteractionType interaction, A
         case EInteractionType::IT_PrimaryInteraction:
         {
             // choose random recipe
-            // spawn item from chosen recipe
+            int32 randomIndex = FMath::RandRange(0, AvailableRecipes.Num() - 1);
+            auto randomRecipe = AvailableRecipes[randomIndex].GetRow<FRecipe>(TEXT("Getting random recipe."));
 
+            SpawnItemFromRecipe(randomRecipe);
             break;
         }
         case EInteractionType::IT_SecondaryInteraction:
