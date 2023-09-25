@@ -89,6 +89,7 @@ void ACraftInteractionTestCharacter::SetupPlayerInputComponent(class UInputCompo
 
 		//Interacting
 		EnhancedInputComponent->BindAction(PrimaryInteraction, ETriggerEvent::Triggered, this, &ThisClass::ExecutePrimaryInteraction);
+		EnhancedInputComponent->BindAction(SecondaryInteraction, ETriggerEvent::Triggered, this, &ThisClass::ExecuteSecondaryInteraction);
 
 		// Drop PickUp
 		EnhancedInputComponent->BindAction(DropPickUpAction, ETriggerEvent::Triggered, PickUpComponent, &UTP_PickUpComponent::DropPickUp);
@@ -168,7 +169,6 @@ void ACraftInteractionTestCharacter::ScanInteractables()
 
 void ACraftInteractionTestCharacter::ExecutePrimaryInteraction()
 {
-	// TODO: RPC to interact on server.
 	// We don't check if it implements interface again because we only assign when it implements
 	if (CurrentFocusObject)
 	{
@@ -185,6 +185,17 @@ void ACraftInteractionTestCharacter::ExecutePrimaryInteraction()
 
 void ACraftInteractionTestCharacter::ExecuteSecondaryInteraction()
 {
+	if (CurrentFocusObject)
+	{
+		TMap<EInteractionType, FInteractionDefinition> interactions;
+
+		ICIInteractable::Execute_GetPossibleInteractions(CurrentFocusObject, interactions);
+
+		if (interactions.Contains(EInteractionType::IT_SecondaryInteraction))
+		{
+			ServerExecuteInteraction(CurrentFocusObject, EInteractionType::IT_SecondaryInteraction);
+		}
+	}
 }
 
 void ACraftInteractionTestCharacter::ServerExecuteInteraction_Implementation(AActor* interactionObject, EInteractionType interactionType)

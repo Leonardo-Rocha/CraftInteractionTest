@@ -57,7 +57,7 @@ void UTP_PickUpComponent::DropPickUp()
 
 void UTP_PickUpComponent::ServerDropPickUp_Implementation(FVector_NetQuantize dropLocation)
 {
-	UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Received drop location: %s"), ANSI_TO_TCHAR(__FUNCTION__), *dropLocation.ToString()));
+	// UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Received drop location: %s"), ANSI_TO_TCHAR(__FUNCTION__), *dropLocation.ToString()));
 
 	FDetachmentTransformRules detachmentRules(EDetachmentRule::KeepWorld, true);
 	CurrentAttachedPickUp->DetachFromActor(detachmentRules);

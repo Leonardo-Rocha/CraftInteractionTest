@@ -8,6 +8,7 @@
 #include <Net/UnrealNetwork.h>
 #include <Net/Core/PushModel/PushModel.h>
 #include <Components/SphereComponent.h>
+#include <Kismet/KismetSystemLibrary.h>
 
 // Sets default values
 ACICraftingMachine::ACICraftingMachine()
@@ -111,7 +112,7 @@ void ACICraftingMachine::SpawnItemFromRecipe(FRecipe* possibleRecipe)
 
 void ACICraftingMachine::OnRep_IsMachineOn()
 {
-    BP_OnMachineStateChanged();
+    UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT(" bMachineOn = %d."), bIsMachineOn));
 }
 
 void ACICraftingMachine::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -190,6 +191,8 @@ void ACICraftingMachine::SetIsMachineOn(bool bNewValue)
         MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, bIsMachineOn, this);
 
         bIsMachineOn = bNewValue;
+
+        UE_LOG(LogTemp, Error, TEXT("[%s] bMachineOn = %d."), ANSI_TO_TCHAR(__FUNCTION__), bIsMachineOn);
     }
 }
 
