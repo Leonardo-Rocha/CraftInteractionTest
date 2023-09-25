@@ -25,6 +25,11 @@ void UTP_PickUpComponent::BeginPlay()
 
 void UTP_PickUpComponent::DropPickUp()
 {
+	if (!CurrentAttachedPickUp)
+	{
+		return;
+	}
+
 	// Ignoring all attached actors - e.g. weapon or picked up items
 	TArray<AActor*> actorsToIgnore;
 	GetOwner()->GetAttachedActors(actorsToIgnore);
