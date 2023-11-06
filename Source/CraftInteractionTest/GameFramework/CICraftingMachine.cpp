@@ -103,16 +103,22 @@ void ACICraftingMachine::SpawnItemFromRecipe(FRecipe* possibleRecipe)
     auto completedRecipeItemDefinition = possibleRecipe->ResultItem.GetRow<FItemDefinition>(TEXT("Completed Recipe"));
     if (const auto world = GetWorld())
     {
-        FVector spawnLocation = GetActorLocation() + GetActorForwardVector() * 100.f;
+        FVector spawnLocation = GetActorLocation() + GetActorForwardVector() * 500.f + FVector(0.f, 0.f, 100.f);
 
         //Set Spawn Collision Handling Override
         FActorSpawnParameters spawnParams;
-        spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+        // In real world we should take care of the spawning conditions, but we're simply testing the system...
+        spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
 
         // Spawn the projectile at the muzzle
-        world->SpawnActor<ACIItemInstance>(completedRecipeItemDefinition->ItemInstanceClass.LoadSynchronous(), spawnLocation, FRotator::ZeroRotator, spawnParams);
-
-        MulticastRecipeCompleted();
+        if (world->SpawnActor<ACIItemInstance>(completedRecipeItemDefinition->ItemInstanceClass.LoadSynchronous(), spawnLocation, FRotator::ZeroRotator, spawnParams))
+        {
+            MulticastRecipeCompleted();
+        }
+        else
+        {
+            MulticastRecipeSpawnFailed();
+        }
     }
 }
 
