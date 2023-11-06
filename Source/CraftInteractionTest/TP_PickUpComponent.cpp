@@ -62,6 +62,11 @@ void UTP_PickUpComponent::DropPickUp()
 
 void UTP_PickUpComponent::ServerDropPickUp_Implementation(FVector_NetQuantize dropLocation)
 {
+	if (!CurrentAttachedPickUp)
+	{
+		return;
+	}
+
 	// UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Received drop location: %s"), ANSI_TO_TCHAR(__FUNCTION__), *dropLocation.ToString()));
 
 	FDetachmentTransformRules detachmentRules(EDetachmentRule::KeepWorld, true);
@@ -78,44 +83,26 @@ void UTP_PickUpComponent::ServerDropPickUp_Implementation(FVector_NetQuantize dr
 	auto newTransform = FTransform(dropLocation);
 
 	CurrentAttachedPickUp->SetActorTransform(newTransform, true);
-	CurrentAttachedPickUp->SetActorEnableCollision(true);
+	CurrentAttachedPickUp->SetIsPickupAvailable(true);
 
 	// UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Adjusted location: %s"), ANSI_TO_TCHAR(__FUNCTION__), *CurrentAttachedPickUp->GetActorLocation().ToString()));
 
 	SetupPickup(nullptr);
 }
 
-void UTP_PickUpComponent::OnRep_CurrentAttachedPickUp(ACIPickup* oldAttachedPickUp)
+void UTP_PickUpComponent::OnRep_CurrentAttachedPickUp()
 {
-	bool bPickupWasDropped = oldAttachedPickUp && !CurrentAttachedPickUp;
-
-	if (bPickupWasDropped)
+	if (!CurrentAttachedPickUp)
 	{
-		if (GetOwner()->HasAuthority())
-		{
-			oldAttachedPickUp->SetIsPickupAvailable(true);
-
-			// It was already detached and adjusted in authority
-			return;
-		}
-
-		// UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Detaching pickup. New Location: %s"), ANSI_TO_TCHAR(__FUNCTION__), *oldAttachedPickUp->GetActorLocation().ToString()));
-
-		// For the clients we simply detach and rely on replication to update the location based on server changes
-		FDetachmentTransformRules detachmentRules(EDetachmentRule::KeepWorld, true);
-		oldAttachedPickUp->DetachFromActor(detachmentRules);
-		oldAttachedPickUp->SetActorEnableCollision(true);
+		return;
 	}
-	else
-	{
-		// UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Received rep notify for obj %s."), ANSI_TO_TCHAR(__FUNCTION__), *CurrentAttachedPickUp->GetName()));
+	// UKismetSystemLibrary::PrintString(GetOwner(), FString::Printf(TEXT("[%s] Received rep notify for obj %s."), ANSI_TO_TCHAR(__FUNCTION__), *CurrentAttachedPickUp->GetName()));
 
-		CurrentAttachedPickUp->SetActorEnableCollision(false);
+	CurrentAttachedPickUp->SetActorEnableCollision(false);
 
-		// Attach the pickup to the First Person Character
-		FAttachmentTransformRules attachmentRules(EAttachmentRule::SnapToTarget, true);
-		CurrentAttachedPickUp->AttachToComponent(OwnerCharacter->GetMesh1P(), attachmentRules, FName(TEXT("PickupSocket")));
-	}
+	// Attach the pickup to the First Person Character
+	FAttachmentTransformRules attachmentRules(EAttachmentRule::SnapToTarget, true);
+	CurrentAttachedPickUp->AttachToComponent(OwnerCharacter->GetMesh1P(), attachmentRules, FName(TEXT("PickupSocket")));
 }
 
 void UTP_PickUpComponent::SetupPickup(ACIPickup* newPickup)
@@ -124,10 +111,16 @@ void UTP_PickUpComponent::SetupPickup(ACIPickup* newPickup)
 	{
 		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, CurrentAttachedPickUp, this);
 
-		ACIPickup* oldPickup = CurrentAttachedPickUp;
+		// newPickup can be nullptr in case we're dropping what we're carrying
+		if (CurrentAttachedPickUp && newPickup)
+		{
+			// Drop the one we're carrying in the location of the new one 
+			ServerDropPickUp(newPickup->GetActorLocation());
+		}
+
 		CurrentAttachedPickUp = newPickup;
 
-		OnRep_CurrentAttachedPickUp(oldPickup);
+		OnRep_CurrentAttachedPickUp();
 	}
 }
 

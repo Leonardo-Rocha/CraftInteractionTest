@@ -64,6 +64,16 @@ void ACIPickup::SetIsPickupAvailable(bool newValue)
 		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, bIsPickUpAvailable, this);
 
 		bIsPickUpAvailable = newValue;
+
+		OnRep_IsPickupAvailable();
+	}
+}
+
+void ACIPickup::OnRep_IsPickupAvailable()
+{
+	if (bIsPickUpAvailable)
+	{
+		SetActorEnableCollision(true);
 	}
 }
 

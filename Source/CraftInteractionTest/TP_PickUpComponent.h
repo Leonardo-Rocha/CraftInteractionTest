@@ -48,7 +48,7 @@ protected:
 	void ServerDropPickUp_Implementation(FVector_NetQuantize dropLocation);
 
 	UFUNCTION()
-	void OnRep_CurrentAttachedPickUp(ACIPickup* oldAttachedPickUp);
+	void OnRep_CurrentAttachedPickUp();
 
 	void GetLifetimeReplicatedProps(TArray< class FLifetimeProperty >& OutLifetimeProps) const;
 };
